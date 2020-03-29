@@ -20,11 +20,18 @@ $logFile = '/path/to/some/monolog.log';
 $reader = new LogReader($logFile);
    
 foreach ($reader as $i => $log) {
-    echo sprintf("The #%s log entry was written at %s. \n", $i, $log['date']->format('Y-m-d h:i:s'));
+    echo sprintf(
+      "The #%s log entry was written at %s. \n", 
+      $i, 
+      $log['date']->format('Y-m-d h:i:s')
+    );
 }
     
 $lastLine = $reader[count($reader)-1];
-echo sprintf("The last log entry was written at %s. \n", $lastLine['date']->format('Y-m-d h:i:s'));
+echo sprintf(
+  "The last log entry was written at %s. \n", 
+  $lastLine['date']->format('Y-m-d h:i:s')
+);
 
 ```
 

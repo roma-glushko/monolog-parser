@@ -12,7 +12,7 @@ use DateTime;
 class LogParser implements LogParserInterface
 {
     protected $metaPattern = '/^\[(?P<date>.*)\] (?P<logger>\w+).(?P<level>\w+): /';
-    protected $recordPattern = '/^\[(?P<date>.*)\] (?P<logger>\w+).(?P<level>\w+): (?P<message>.*) (?P<context>[^ ]+) (?P<extra>[^ ]+)$/s';
+    protected $recordPattern = '/^\[(?P<date>.*)\] (?P<logger>\w+).(?P<level>\w+): (?P<message>.*) (?P<context>[\[\{].*[\}\]]) (?P<extra>[\[\{].*[\]\{])$/s';
 
     /**
      * @param string|null $recordPattern
@@ -54,11 +54,11 @@ class LogParser implements LogParserInterface
      */
     function parseMeta(string $log): array
     {
-        if( !is_string($log) || $log === '') {
+        if (!is_string($log) || $log === '') {
             return [];
         }
 
-        preg_match($this->recordPattern, $log, $data);
+        preg_match($this->metaPattern, $log, $data);
 
         if (!isset($data['date'])) {
             return [];

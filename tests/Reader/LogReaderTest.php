@@ -68,14 +68,14 @@ class LogReaderTest extends TestCase
 
         $this->assertFalse($reader->offsetExists(100));
 
-        $this->assertEquals(3, count($reader));
+        $this->assertEquals(8, count($reader));
 
         foreach ($reader as $i => $log) {
             $lines[] = $log;
             $keys[] = $i;
         }
 
-        $this->assertEquals([0, 1, 2], $keys);
+        $this->assertEquals([0, 1, 2, 3, 4, 5, 6, 7], $keys);
         $this->assertEquals('test', $lines[0]['logger']);
         $this->assertEquals('system', $lines[1]['logger']);
         $this->assertEquals('report', $lines[2]['logger']);

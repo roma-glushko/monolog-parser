@@ -23,14 +23,24 @@ class LogReader implements Iterator, ArrayAccess, Countable
     protected $file;
 
     /**
-     * @var integer
+     * @var int
      */
-    protected $lineCount;
+    private $currentOffset;
+
+    /**
+     * @var int
+     */
+    protected $recordCount;
 
     /**
      * @var LogParserInterface
      */
     protected $parser;
+
+    /**
+     * @var []
+     */
+    private $recordMap;
 
     /**
      * @param string $filePath
@@ -40,15 +50,10 @@ class LogReader implements Iterator, ArrayAccess, Countable
     {
         $this->parser = $parser ?? new LogParser();
         $this->file = new SplFileObject($filePath, 'r');
-        $i = 0;
 
-        while (!$this->file->eof()) {
-            $this->file->current();
-            $this->file->next();
-            $i++;
-        }
-
-        $this->lineCount = $i;
+        $this->recordMap = $this->getRecordMap();
+        $this->recordCount = count($this->recordMap);
+        $this->currentOffset = 0;
     }
 
     /**
@@ -65,7 +70,7 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function offsetExists($offset)
     {
-        return $offset < $this->lineCount;
+        return $offset < $this->recordCount;
     }
 
     /**
@@ -73,9 +78,13 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function offsetGet($offset)
     {
+        $previousOffset = $this->currentOffset;
         $key = $this->file->key();
-        $this->file->seek($offset);
+
+        $this->currentOffset = $offset;
         $log = $this->current();
+
+        $this->currentOffset = $previousOffset;
         $this->file->seek($key);
         $this->file->current();
 
@@ -103,6 +112,7 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function rewind()
     {
+        $this->currentOffset = 0;
         $this->file->rewind();
     }
 
@@ -111,7 +121,7 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function next()
     {
-        $this->file->next();
+        $this->currentOffset++;
     }
 
     /**
@@ -119,7 +129,20 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function current()
     {
-        return $this->parser->parse($this->file->current());
+        $currentRecord = $this->getRecord($this->currentOffset);
+
+        $recordStart = $currentRecord['start'];
+        $recordEnd = $currentRecord['end'];
+        $this->file->seek($recordStart);
+
+        $buffer = '';
+
+        for ($i = $recordStart; $i <= $recordEnd; $i++) {
+            $buffer .= $this->file->current();
+            $this->file->next();
+        }
+
+        return $this->parser->parse($buffer);
     }
 
     /**
@@ -127,7 +150,7 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function key()
     {
-        return $this->file->key();
+        return $this->currentOffset;
     }
 
     /**
@@ -135,7 +158,7 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function valid()
     {
-        return $this->file->valid();
+        return $this->currentOffset < $this->recordCount;
     }
 
     /**
@@ -143,6 +166,68 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function count()
     {
-        return $this->lineCount;
+        return $this->recordCount;
+    }
+
+    /**
+     * @param int $recordOffset
+     *
+     * @return array
+     */
+    private function getRecord(int $offset): array
+    {
+        return $this->recordMap[$offset];
+    }
+
+    /**
+     * Get positions of all needed log records in the file including multiline records
+     *
+     * @return array
+     */
+    private function getRecordMap(): array
+    {
+        $recordMap = [];
+        $fileLinePointer = 0;
+        $currentRecord = [];
+
+        while (!$this->file->eof()) {
+            $fileLine = $this->file->current();
+            $logMeta = $this->parser->parseMeta($fileLine);
+
+            // the line is part of log record
+            if ([] === $logMeta) {
+                $this->file->next();
+                $fileLinePointer++;
+                continue;
+            }
+
+            // it's time to flush information about previous record
+            if ([] !== $currentRecord) {
+                $currentRecord['end'] = $fileLinePointer - 1;
+                $recordMap[] = $currentRecord;
+
+                $currentRecord = [];
+            }
+
+            // the line is the beginning of the new log record
+            if ([] === $currentRecord) {
+                $currentRecord = [
+                    'start' => $fileLinePointer,
+                    'date' => $logMeta['date'],
+                    'level' => $logMeta['level'],
+                ];
+            }
+
+            $this->file->next();
+            $fileLinePointer++;
+        }
+
+        // flush information about the last record
+        if ([] !== $currentRecord) {
+            $currentRecord['end'] = $fileLinePointer;
+            $recordMap[] = $currentRecord;
+        }
+
+        return $recordMap;
     }
 }

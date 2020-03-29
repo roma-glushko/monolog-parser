@@ -1,6 +1,8 @@
 Monolog Parser
 ==============
 
+![](https://github.com/roma-glushko/monolog-parser/workflows/.github/workflows/php.yml/badge.svg)
+
 A package for parsing [monolog](https://github.com/Seldaek/monolog) records including multiline support.
 
 ## Installation

@@ -17,7 +17,7 @@ class LogReaderTest extends TestCase
     /**
      *
      */
-    public function testReader()
+    public function testReader(): void
     {
         $filePath = __DIR__ . '/../files/sample.log';
         $reader = new LogReader($filePath);
@@ -37,45 +37,74 @@ class LogReaderTest extends TestCase
         $this->assertEquals('DEBUG', $log['level']);
         $this->assertEquals('foobar', $log['message']);
         $this->assertArrayNotHasKey('foo', $log['context']);
+
+        $log = $reader[2];
+
+        $this->assertInstanceOf(DateTime::class, $log['date']);
+        $this->assertEquals('report', $log['logger']);
+        $this->assertEquals('ERROR', $log['level']);
+        // multiline message
+        $this->assertStringContainsString('unable to connect to tcp://127.0.0.1:5672', $log['message']);
+        $this->assertStringContainsString('Amqp\Config->createConnection()', $log['message']);
+        $this->assertStringContainsString('Symfony\Component\Console\Application->run()', $log['message']);
+        $this->assertStringContainsString('#22 {main}', $log['message']);
     }
 
-    public function testIterator()
+    /**
+     *
+     */
+    public function testIterator(): void
     {
         // the test.log file contains 2 log lines
         $filePath = __DIR__ . '/../files/sample.log';
         $reader = new LogReader($filePath);
-        $lines = array();
-        $keys = array();
+
+        $lines = [];
+        $keys = [];
 
         $this->assertTrue($reader->offsetExists(0));
         $this->assertTrue($reader->offsetExists(1));
         $this->assertTrue($reader->offsetExists(2));
 
-        $this->assertFalse($reader->offsetExists(99));
+        $this->assertFalse($reader->offsetExists(100));
 
         $this->assertEquals(3, count($reader));
 
         foreach ($reader as $i => $log) {
-            $test = $reader[0];
             $lines[] = $log;
             $keys[] = $i;
         }
 
-        $this->assertEquals([0, 1], $keys);
+        $this->assertEquals([0, 1, 2], $keys);
         $this->assertEquals('test', $lines[0]['logger']);
         $this->assertEquals('system', $lines[1]['logger']);
+        $this->assertEquals('report', $lines[2]['logger']);
 
     }
 
     /**
-     * @expectedException RuntimeException
      */
-    public function testException()
+    public function testReadonlyMode(): void
     {
         $filePath = __DIR__ . '/../files/sample.log';
 
+        $this->expectException(RuntimeException::class);
+
+        $reader = new LogReader($filePath);
+        $reader[5] = 'foo';
+
+        $this->expectException(RuntimeException::class);
+        unset($reader[2]);
+    }
+
+    /**
+     */
+    public function testBrokenLog(): void
+    {
+        $filePath = __DIR__ . '/../files/broken.log';
+
         $reader = new LogReader($filePath);
 
-        $reader[5] = 'foo';
+        $this->assertEquals(0, count($reader));
     }
 }

@@ -1,0 +1,11 @@
+-01-10 14:19:51] test.INFO: foobar {"foo":"bar"} []
+[2020-02-20 14:19:51] .DEBUG: foobar [] []
+[2020-03-25 16:27:13] report.: AMQP topology installation failed: stream_socket_client(): unable to connect to tcp://127.0.0.1:5672 (Connection refused)
+#0 [internal function]: PhpAmqpLib\Wire\IO\StreamIO->error_handler(2, 'stream_socket_c...', '/home/dev/sites...', 141, Array)
+#1 /home/dev/sites/project/vendor/php-amqplib/php-amqplib/PhpAmqpLib/Wire/IO/StreamIO.php(141): stream_socket_client('tcp://127.0.0.1...', 111, 'Connection refu...', 3, 4, Resource id #21711)
+#2 /home/dev/sites/project/vendor/php-amqplib/php-amqplib/PhpAmqpLib/Connection/AbstractConnection.php(205): PhpAmqpLib\Wire\IO\StreamIO->connect()
+#3 /home/dev/sites/project/vendor/php-amqplib/php-amqplib/PhpAmqpLib/Connection/AbstractConnection.php(189): PhpAmqpLib\Connection\AbstractConnection->connect()
+#4 /home/dev/sites/project/vendor/php-amqplib/php-amqplib/PhpAmqpLib/Connection/AMQPStreamConnection.php(60): PhpAmqpLib\Connection\AbstractConnection->__construct('rabbitmq', 'gabfey5qnqkCSze...', '/', false, 'AMQPLAIN', NULL, 'en_US', Object(PhpAmqpLib\Wire\IO\StreamIO), 0, 3)
+#5 /home/dev/sites/project/vendor/magento/framework/ObjectManager/Factory/AbstractFactory.php(116): PhpAmqpLib\Connection\AMQPStreamConnection->__construct('127.0.0.1', '5672', 'rabbitmq', 'gabfey5qnqkCSze...', '/', false, 'AMQPLAIN', NULL, 'en_US', 3, 3, NULL, false, 0)
+#6 /home/dev/sites/project/vendor/magento/framework/ObjectManager/Factory/Dynamic/Developer.php(66): Magento\Framework\ObjectManager\Factory\AbstractFactory->createObject('PhpAmqpLib\\Conn...', Array)
+#22 {main} [] []

@@ -19,8 +19,8 @@ use MonologParser\Reader\LogReader;
 $logFile = '/path/to/some/monolog.log';
 $reader = new LogReader($logFile);
    
-foreach ($reader as $log) {
-    echo sprintf("The log entry was written at %s. \n", $log['date']->format('Y-m-d h:i:s'));
+foreach ($reader as $i => $log) {
+    echo sprintf("The #%s log entry was written at %s. \n", $i, $log['date']->format('Y-m-d h:i:s'));
 }
     
 $lastLine = $reader[count($reader)-1];

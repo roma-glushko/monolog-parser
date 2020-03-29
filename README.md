@@ -1,6 +1,10 @@
 Monolog Parser
 ==============
 
+![](https://github.com/roma-glushko/monolog-parser/workflows/CI/badge.svg)
+[![Latest Stable Version](https://poser.pugx.org/roma-glushko/monolog-parser/v/stable)](https://packagist.org/packages/roma-glushko/monolog-parser)
+[![License](https://poser.pugx.org/roma-glushko/monolog-parser/license)](https://packagist.org/packages/roma-glushko/monolog-parser)
+
 A package for parsing [monolog](https://github.com/Seldaek/monolog) records including multiline support.
 
 ## Installation

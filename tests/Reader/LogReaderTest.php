@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MonologReader\Test\Reader;
 
 use DateTime;
+use MonologParser\Parser\LogParser;
 use MonologParser\Reader\LogReader;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -68,7 +69,7 @@ class LogReaderTest extends TestCase
 
         $this->assertFalse($reader->offsetExists(100));
 
-        $this->assertEquals(8, count($reader));
+        $this->assertCount(8, $reader);
 
         foreach ($reader as $i => $log) {
             $lines[] = $log;
@@ -79,7 +80,6 @@ class LogReaderTest extends TestCase
         $this->assertEquals('test', $lines[0]['logger']);
         $this->assertEquals('system', $lines[1]['logger']);
         $this->assertEquals('report', $lines[2]['logger']);
-
     }
 
     /**
@@ -87,11 +87,18 @@ class LogReaderTest extends TestCase
     public function testReadonlyMode(): void
     {
         $filePath = __DIR__ . '/../files/sample.log';
+        $reader = new LogReader($filePath);
 
         $this->expectException(RuntimeException::class);
-
-        $reader = new LogReader($filePath);
         $reader[5] = 'foo';
+    }
+
+    /**
+     */
+    public function testUnset(): void
+    {
+        $filePath = __DIR__ . '/../files/sample.log';
+        $reader = new LogReader($filePath);
 
         $this->expectException(RuntimeException::class);
         unset($reader[2]);
@@ -105,6 +112,56 @@ class LogReaderTest extends TestCase
 
         $reader = new LogReader($filePath);
 
-        $this->assertEquals(0, count($reader));
+        $this->assertCount(0, $reader);
+    }
+
+    /**
+     * @dataProvider emptyParserProvider
+     *
+     * @param string $record
+     * @return void
+     */
+    public function testLogParserEmpty(string $record): void
+    {
+        $parser = new LogParser();
+
+        $this->assertEquals([], $parser->parse($record));
+        $this->assertEquals([], $parser->parseMeta($record));
+    }
+
+    /**
+     * @dataProvider nodateParserProvider
+     *
+     * @param string $record
+     * @return void
+     */
+    public function testLogParserNoDate(string $record): void
+    {
+        $parser = new LogParser();
+
+        $this->assertFalse($parser->parse($record)['date']);
+        $this->assertFalse($parser->parseMeta($record)['date']);
+    }
+
+    /**
+     * @return array
+     */
+    public function nodateParserProvider(): array
+    {
+        return [
+            ['[testdate] report.ERROR: test [] []'],
+            ['[2020-02-80 14:19] test.DEBUG: hello [] []'],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function emptyParserProvider(): array
+    {
+        return [
+            [''],
+            ['not empty but completely wrong format [] []'],
+        ];
     }
 }

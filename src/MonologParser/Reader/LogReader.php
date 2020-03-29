@@ -57,15 +57,6 @@ class LogReader implements Iterator, ArrayAccess, Countable
     }
 
     /**
-     * @param LogParserInterface $parser
-     * @return void
-     */
-    public function setParser(LogParserInterface $parser): void
-    {
-        $this->parser = $parser;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function offsetExists($offset)
@@ -96,7 +87,7 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function offsetSet($offset, $value)
     {
-        throw new RuntimeException("LogReader is read-only.");
+        throw new RuntimeException('LogReader is read-only.');
     }
 
     /**
@@ -104,7 +95,7 @@ class LogReader implements Iterator, ArrayAccess, Countable
      */
     public function offsetUnset($offset)
     {
-        throw new RuntimeException("LogReader is read-only.");
+        throw new RuntimeException('LogReader is read-only.');
     }
 
     /**
@@ -170,7 +161,7 @@ class LogReader implements Iterator, ArrayAccess, Countable
     }
 
     /**
-     * @param int $recordOffset
+     * @param int $offset
      *
      * @return array
      */

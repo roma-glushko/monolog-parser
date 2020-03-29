@@ -6,4 +6,9 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist>
+            <directory>src/MonologParser</directory>
+        </whitelist>
+    </filter>
 </phpunit>

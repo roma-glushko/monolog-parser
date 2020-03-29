@@ -14,7 +14,7 @@ composer require roma-glushko/monolog-parser
 ```php
 require_once 'path/to/vendor/autoload.php';
   
-use Dubture\Monolog\Reader\LogReader;
+use MonologParser\Reader\LogReader;
     
 $logFile = '/path/to/some/monolog.log';
 $reader = new LogReader($logFile);

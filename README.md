@@ -1,7 +1,7 @@
 Monolog Parser
 ==============
 
-A simple library for parsing [monolog](https://github.com/Seldaek/monolog) records including multiline support.
+A package for parsing [monolog](https://github.com/Seldaek/monolog) records including multiline support.
 
 ## Installation
 
